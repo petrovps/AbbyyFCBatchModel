@@ -58,23 +58,15 @@ namespace ExportBatch
             DocumentModel.Document EDocument = new DocumentModel.Document();
             EDocument.Name = Document.DefinitionName;
             EDocument.Id = Document.Id;
-
-            var FieldList = new List<DocumentModel.Field>();
-            foreach (IField field in Document.Sections[0].Children)
-                FieldList.Add(MakeField(field));
-            EDocument.Fields = FieldList.Where(item => item != null).ToList();
-            var GroupList = new List<DocumentModel.Group>();
-            foreach (IField field in Document.Sections[0].Children)
-                GroupList.Add(MakeGroup(field));
-            EDocument.Groups = GroupList.Where(item => item != null).ToList();
-            var InstanceList = new List<DocumentModel.RepeatableInstance>();
-            foreach (IField field in Document.Sections[0].Children)
-                InstanceList.Add(MakeRepeatableInstance(field));
-            EDocument.RepeatableInstances = InstanceList.Where(item => item != null).ToList();
             var EPages = new List<DocumentModel.Page>();
             foreach (IPage page in Document.Pages)
                 EPages.Add(MakePage(page));
             EDocument.Pages = EPages.Where(item => item != null).ToList();
+
+            var ESections = new List<DocumentModel.Section>();
+            foreach (IField Section in Document.Sections)
+                ESections.Add(MakeSection(Section));
+            EDocument.Sections = ESections.Where(item => item != null).ToList();
             return EDocument;
         }
         private static DocumentModel.Page MakePage(IPage Page)
@@ -84,85 +76,179 @@ namespace ExportBatch
             EPage.PageIndex = Page.ImageSourcePageNumber;
             return EPage;
         }
+        private static DocumentModel.Section MakeSection(IField section)
+        {
+            DocumentModel.Section Section = new DocumentModel.Section();
+            Section.Name = section.Name;
+            #region Fields
+            var FieldList = new List<DocumentModel.Field>();
+            foreach (IField field in section.Children)
+                FieldList.Add(MakeField(field));
+            Section.Fields = FieldList.Where(item => item != null).ToList();
+            #endregion Fields
+            #region Groups
+            var GroupList = new List<DocumentModel.Group>();
+            foreach (IField field in section.Children)
+                GroupList.Add(MakeGroup(field));
+            Section.Groups = GroupList.Where(item => item != null).ToList();
+            #endregion Groups
+            #region Tables
+            var TableList = new List<DocumentModel.Table>();
+            foreach (IField field in section.Children)
+                TableList.Add(MakeTable(field));
+            Section.Tables = TableList.Where(item => item != null).ToList();
+            #endregion Tables
+            return Section;
+        }
         private static DocumentModel.Field MakeField(IField Field)
         {
-
             DocumentModel.Field EField = new DocumentModel.Field();
-            if (!HasItems(Field))
+            if (Field.Type == TExportFieldType.EFT_Checkmark || Field.Type == TExportFieldType.EFT_CurrencyField || Field.Type == TExportFieldType.EFT_DateTimeField || Field.Type == TExportFieldType.EFT_NumberField || Field.Type == TExportFieldType.EFT_TextField || Field.Type == TExportFieldType.EFT_TimeField)
             {
-                if (Field.Type != TExportFieldType.EFT_Table || Field.Type != TExportFieldType.EFT_Group)
+                EField.Name = Field.Name;
+                if (!HasItems(Field)) // если поле не содержит повторяющихся элементов (обычное поле)
                 {
-                    EField.Name = Field.Name;
+                   
                     EField.Value = Field.Text;
                     EField.SuspiciousSymbols = Field.SuspiciousSymbols;
-                    return EField;
+                    EField.Regions = MakeRegions(Field);
+
                 }
+                else
+                {
+                    var FieldList = new List<DocumentModel.Field>();
+                    foreach (IField Items in Field.Items)
+                    {
+                        DocumentModel.Field field = new DocumentModel.Field();
+                        field.Name = Items.Name;
+                        field.Value = Items.Text;
+                        field.SuspiciousSymbols = Items.SuspiciousSymbols;
+                        field.Regions = MakeRegions(Items);
+                        FieldList.Add(field);
+                    }
+                    EField.Instances = FieldList.Where(item => item != null).ToList();
+                }
+                return EField;
             }
 
             return null;
         }
+
+        private static List<DocumentModel.Region> MakeRegions(IField Field)
+        {
+            List<DocumentModel.Region> ERegions = new List<DocumentModel.Region>();
+            foreach (IFieldRegion _region in Field.Regions)
+            {
+                DocumentModel.Region region = new DocumentModel.Region();
+                region.PageIndex = _region.PageIndex;
+                List<DocumentModel.Rect> ERects = new List<DocumentModel.Rect>();
+                foreach(IRect _rect in _region.Rects)
+                {
+                    DocumentModel.Rect rect = new DocumentModel.Rect();
+                    rect.Bottom = _rect.Bottom;
+                    rect.Left = _rect.Left;
+                    rect.Right = _rect.Right;
+                    rect.Top = _rect.Top;
+                    ERects.Add(rect);
+                }
+                region.Rects=ERects.Where(item => item != null).ToList();
+
+                ERegions.Add(region);
+            }
+          
+            return ERegions;
+        }
+
+
+
+
+
         private static DocumentModel.Group MakeGroup(IField Field)
         {
             DocumentModel.Group EGroup = new DocumentModel.Group();
             if (Field.Type == TExportFieldType.EFT_Group)
             {
-                if (!HasItems(Field))
+                EGroup.Name = Field.Name;
+                if (!HasItems(Field)) // Проверяем что группа не содержит повторяющиеся элементы (обычная группа)
                 {
+                    #region Fields
                     var FieldList = new List<DocumentModel.Field>();
                     foreach (IField field in Field.Children)
                         FieldList.Add(MakeField(field));
-                    EGroup.Fields = FieldList;
+                    EGroup.Fields = FieldList.Where(item => item != null).ToList(); ;
+                    #endregion Fields
+                    #region Group
                     var GroupList = new List<DocumentModel.Group>();
                     foreach (IField field in Field.Children)
                         GroupList.Add(MakeGroup(field));
                     EGroup.Groups = GroupList.Where(item => item != null).ToList();
-                    var InstanceList = new List<DocumentModel.RepeatableInstance>();
+                    #endregion Group
+                    #region Tables
+                    var TableList = new List<DocumentModel.Table>();
                     foreach (IField field in Field.Children)
-                        InstanceList.Add(MakeRepeatableInstance(field));
-                    EGroup.RepeatableInstances = InstanceList.Where(item => item != null).ToList();
-                    return EGroup;
+                        TableList.Add(MakeTable(field));
+                    EGroup.Tables = TableList.Where(item => item != null).ToList();
+                    #endregion Tables
+                  
                 }
-            }
-            return null;
-        }
-        private static DocumentModel.RepeatableInstance MakeRepeatableInstance(IField Field)
-        {
-            DocumentModel.RepeatableInstance ERepeatableInstance = new DocumentModel.RepeatableInstance();
-            ERepeatableInstance.Name = Field.Name;
-            if (Field.Type == TExportFieldType.EFT_Group || Field.Type == TExportFieldType.EFT_Table)
-            {
-                if (HasItems(Field))
+                else
                 {
-                    List<DocumentModel.Instance> EInstances = new List<DocumentModel.Instance>();
-                    for (int i = 0; i < Field.Items.Count; i++)
+                    var InstancesList = new List<DocumentModel.Group>();
+                    foreach(IField Instance in Field.Items)
                     {
-                        EInstances.Add(MakeInstance(Field.Items[i].Children));
+                        InstancesList.Add(MakeGroup(Instance));
                     }
-
-                    ERepeatableInstance.Instances = EInstances;
-                    return ERepeatableInstance;
+                    EGroup.Instances = InstancesList.Where(item => item != null).ToList();
                 }
+
+
+                return EGroup;
+
             }
             return null;
         }
-        private static DocumentModel.Instance MakeInstance(IFields Fields)
+        private static DocumentModel.Table MakeTable(IField Field)
         {
-            DocumentModel.Instance EInstance = new DocumentModel.Instance();
-            var FieldList = new List<DocumentModel.Field>();
-            foreach (IField field in Fields)
-                FieldList.Add(MakeField(field));
-            EInstance.Fields = FieldList;
-            var GroupList = new List<DocumentModel.Group>();
-            foreach (IField field in Fields)
-                GroupList.Add(MakeGroup(field));
-            EInstance.Groups = GroupList.Where(item => item != null).ToList();
+            DocumentModel.Table ETable = new DocumentModel.Table();
+            if (Field.Type == TExportFieldType.EFT_Table)
+            {
+                ETable.Name = Field.Name;
+                var RowList = new List<DocumentModel.Row>();
+                if (Field.Rows.Count > 0)
+                {
+                    int rowcount = 0;
+                    foreach (IField Row in Field.Rows)
+                    {
+                        RowList.Add(MakeRow(Row, rowcount));
+                        rowcount++;
+                    }
+                    ETable.Rows = RowList.Where(item => item != null).ToList(); ;
+                }
+                return ETable;
+            }
+            return null;
+        }
+        private static DocumentModel.Row MakeRow(IField Row, int index)
+        {
+            DocumentModel.Row ERow = new DocumentModel.Row();
+            ERow.Index = index;
+            var ColumnList = new List<DocumentModel.Column>();
+            foreach (IField Column in Row.Children)
+            {
+                ColumnList.Add(MakeColumn(Column));
+            }
+            ERow.Columns = ColumnList;
+            return ERow;
+        }
+        private static DocumentModel.Column MakeColumn(IField Column)
+        {
+            DocumentModel.Column EColumn = new DocumentModel.Column();
+            EColumn.ColumnName = Column.Name;
+            EColumn.Value = Column.Text;
+            EColumn.SuspiciousSymbols = Column.SuspiciousSymbols;
+             EColumn.Regions = MakeRegions(Column);
 
-            var RepeatableInstanceList = new List<DocumentModel.RepeatableInstance>();
-            foreach (IField field in Fields)
-                RepeatableInstanceList.Add(MakeRepeatableInstance(field));
-            EInstance.RepeatableInstances = RepeatableInstanceList.Where(item => item != null).ToList();
-
-            return EInstance;
+            return EColumn;
         }
         private static bool HasItems(IField Field)
         {
