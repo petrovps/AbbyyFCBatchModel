@@ -55,6 +55,24 @@
   <ItemGroup>
     <Compile Include="DocumentModel.cs" />
     <Compile Include="Export.cs" />
+    <Compile Include="ExportBatch.cs" />
+    <Compile Include="Models\ExportFlat\Document.cs" />
+    <Compile Include="Models\ExportFlat\Collection.cs" />
+    <Compile Include="Models\ExportFlat\Field.cs" />
+    <Compile Include="Models\ExportFlat\Item.cs" />
+    <Compile Include="Models\ExportFlat\Propertie.cs" />
+    <Compile Include="Models\ExportFlat\Responce.cs" />
+    <Compile Include="Models\ExportFlat\ResponceStatus.cs" />
+    <Compile Include="Models\ExportFlat\Section.cs" />
+    <Compile Include="Models\ExportFlat\StatusCodes.cs" />
+    <Compile Include="Models\Export\Batch.cs" />
+    <Compile Include="Models\Export\Document.cs" />
+    <Compile Include="Models\Export\Field.cs" />
+    <Compile Include="Models\Export\Item.cs" />
+    <Compile Include="Models\Export\Property.cs" />
+    <Compile Include="Models\Export\Rect.cs" />
+    <Compile Include="Models\Export\Region.cs" />
+    <Compile Include="Models\Export\Section.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
