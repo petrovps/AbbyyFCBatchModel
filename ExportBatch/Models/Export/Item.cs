@@ -18,11 +18,55 @@ namespace ExportBatch.Models.Export
         public Item(IField fitem)
         {
             var rFields = new List<Field>();
-            foreach (IField f in fitem.Children)
+            if (HasChildren(fitem))
             {
-                rFields.Add(new Field(f));
+                foreach (IField f in fitem.Children)
+                {
+                    rFields.Add(new Field(f));
+                }
             }
-            Fields = rFields.Where(item => item != null).ToList();
+            else if (HasItems(fitem))
+            {
+                foreach (IField f in fitem.Items)
+                {
+                    rFields.Add(new Field(f));
+                }
+            }
+            Fields = rFields;
+        }
+
+        private static bool HasItems(IField Field)
+        {
+            bool IsRepeatable = false;
+            try
+            {
+                if (Field.Items.Count > 0)
+                    IsRepeatable = true;
+
+            }
+            catch (NullReferenceException e)
+            {
+                IsRepeatable = false;
+            }
+
+            return IsRepeatable;
+        }
+
+        private static bool HasChildren(IField Field)
+        {
+            bool IsRepeatable = false;
+            try
+            {
+                if (Field.Children.Count > 0)
+                    IsRepeatable = true;
+
+            }
+            catch (NullReferenceException e)
+            {
+                IsRepeatable = false;
+            }
+
+            return IsRepeatable;
         }
     }
 }

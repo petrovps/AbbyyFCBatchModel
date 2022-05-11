@@ -54,7 +54,7 @@ namespace ExportBatch.Models.Export
                 //if (Field.SuspiciousSymbols.Length > 0)
                 //    Accuracy = Field.SuspiciousSymbols.Replace("1", "").Length * 100 / Field.SuspiciousSymbols.Length;
             }
-            else if (HasItems(Field))
+            else if (!IsLeaf(Field) && HasItems(Field))
             {
                 var items = new List<Item>();
                 foreach(IField item in Field.Items)
