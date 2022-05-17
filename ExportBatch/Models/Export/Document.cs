@@ -18,12 +18,15 @@ namespace ExportBatch.Models.Export
 
         [JsonProperty("properties")]
         public List<Property> Properties { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
 
 
         public Document() { }
         public Document(IDocument document)
         {
             Name = document.DocumentDefinition.Name;
+            Id = document.Id;
             Properties = GetProps(document.Properties).Where(item => item != null).ToList();
             Sections = GetSections(document.Sections).Where(item => item != null).ToList();
         }

@@ -16,6 +16,8 @@ namespace ExportBatch.Models.Export
         [JsonProperty("value")]
         public string Value { get; set; }
 
+        public Property() { }
+
         public Property(IProperty property)
         {
             Name = property.Name;

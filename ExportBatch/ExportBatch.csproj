@@ -45,6 +45,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,6 +58,11 @@
     <Compile Include="DocumentModel.cs" />
     <Compile Include="Export.cs" />
     <Compile Include="ExportBatch.cs" />
+    <Compile Include="Models\CompareResult\CRBatch.cs" />
+    <Compile Include="Models\CompareResult\CRDocument.cs" />
+    <Compile Include="Models\CompareResult\CRField.cs" />
+    <Compile Include="Models\CompareResult\CRItem.cs" />
+    <Compile Include="Models\CompareResult\CRSection.cs" />
     <Compile Include="Models\ExportFlat\Document.cs" />
     <Compile Include="Models\ExportFlat\Collection.cs" />
     <Compile Include="Models\ExportFlat\Field.cs" />
@@ -73,7 +80,10 @@
     <Compile Include="Models\Export\Rect.cs" />
     <Compile Include="Models\Export\Region.cs" />
     <Compile Include="Models\Export\Section.cs" />
+    <Compile Include="Models\RCSRequest\RCSRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QualityAnalysis.cs" />
+    <Compile Include="Tools\Tables.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

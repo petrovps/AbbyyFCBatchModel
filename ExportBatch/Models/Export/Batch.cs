@@ -24,7 +24,8 @@ namespace ExportBatch.Models.Export
 
         [JsonProperty("creationDate")]
         public string CreationDate { get; set; }
-
+        [JsonProperty("id")]
+        public int Id { get; set; }
 
         public Batch() { }
 
@@ -32,16 +33,19 @@ namespace ExportBatch.Models.Export
         {
             Name = Batch.Name;
             BatchTypeName = Batch.BatchTypeName;
+            Id = Batch.Id;
             CreationDate = Batch.CreationDate.ToString();
             Properties = GetProps(Batch.Properties).Where(item => item != null).ToList(); 
             Description = Batch.Comment;
             Documents = GetDocuments(Batch.Documents).Where(item => item != null).ToList();
+
         }
         private List<Document> GetDocuments(IDocuments docs)
         {
             var rDocuments = new List<Document>();
             foreach (IDocument doc in docs)
             {
+                if(doc != null && !string.IsNullOrEmpty(doc.DefinitionName))
                 rDocuments.Add(new Document(doc));
             }
             return rDocuments;
@@ -56,6 +60,7 @@ namespace ExportBatch.Models.Export
             }
             return props;
         }
+
 
 
 
