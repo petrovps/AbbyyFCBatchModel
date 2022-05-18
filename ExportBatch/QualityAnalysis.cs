@@ -35,24 +35,28 @@ namespace ExportBatch
 
                     batch.Properties.Set("BatchQuality", cRBatch.Quality.ToString());
 
+                   
+
                     foreach(var cDoc in cRBatch.Documents)
                     {
-                        foreach(IDocument doc in batch.Documents)
-                        {
-                            //if (cDoc.Id != null)
-                            //{
-                            //    if (cDoc.Id.Equals(doc.Id))
-                            //    {
-                            //        doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
-                            //        break;
-                            //    }
-                            //}
-                            if (cDoc.Name.Equals(doc.DefinitionName))
-                            {
-                                doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
-                                break;
-                            }
-                        }
+                        batch.Properties.Set($"Quality_{cDoc.Name}", cDoc.Quality.ToString());
+
+                        //foreach(IDocument doc in batch.Documents)
+                        //{
+                        //    //if (cDoc.Id != null)
+                        //    //{
+                        //    //    if (cDoc.Id.Equals(doc.Id))
+                        //    //    {
+                        //    //        doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
+                        //    //        break;
+                        //    //    }
+                        //    //}
+                        //    if (cDoc.Name.Equals(doc.DefinitionName))
+                        //    {
+                        //        doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
+                        //        break;
+                        //    }
+                        //}
                     }
 
 
