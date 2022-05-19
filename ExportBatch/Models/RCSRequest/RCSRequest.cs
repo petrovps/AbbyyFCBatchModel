@@ -17,8 +17,8 @@ namespace ExportBatch.Models.RCSRequest
         public string ProcessName { get; set; }
         [JsonProperty(PropertyName = "processParams")]
         public List<Param> ProcessParams { get; set; }
-        [JsonProperty(PropertyName = "files")]
-        public List<File> Files { get; set; }
+        [JsonProperty(PropertyName = "items")]
+        public List<Item> Items { get; set; }
         [JsonProperty(PropertyName = "serviceParams")]
         public List<Param> ServiceParams { get; set; }
         [JsonProperty(PropertyName = "processVersion")]
@@ -28,20 +28,13 @@ namespace ExportBatch.Models.RCSRequest
             CustomerId = "Customer1";
             RequestId = Guid.NewGuid().ToString();
             ProcessName = "Process1";
-            var Param = new Param();
-
-
+            var Param = new Param() { Name = "ParamName", Value = "ParamValue"};
             ProcessParams = new List<Param>() { Param };
             ServiceParams = new List<Param>() { Param };
             ProcessVersion = "2.0";
-
-            var file = new File();
-            Files = new List<File>() { file };
-
+            var file = new Item();
+            Items = new List<Item>() { file };
         }
-
-
-
     }
 
     public class Param
@@ -59,7 +52,7 @@ namespace ExportBatch.Models.RCSRequest
     }
 
 
-    public class File
+    public class Item
     {
         [JsonProperty(PropertyName = "name")]
         public string Name { get; set; }
@@ -68,16 +61,17 @@ namespace ExportBatch.Models.RCSRequest
 
         [JsonProperty(PropertyName = "ref")]
         public string Ref { get; set; }
-        [JsonProperty(PropertyName = "fileParams")]
-        public List<Param> FileParams { get; set; }
+        [JsonProperty(PropertyName = "itemParams")]
+        public List<Param> ItemParams { get; set; }
 
 
-        public File() {
+        public Item() {
 
             Name = "Filename.jpg";
             Type = "image";
             Ref =Guid.NewGuid().ToString();
-            FileParams = new List<Param>();
+            var Param = new Param() { Name = "ParamName", Value = "ParamValue" };
+            ItemParams = new List<Param>() { Param };
         }
 
     }

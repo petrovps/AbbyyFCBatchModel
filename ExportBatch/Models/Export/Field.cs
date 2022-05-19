@@ -47,7 +47,8 @@ namespace ExportBatch.Models.Export
                 HasRuleError = Field.HasRuleError;
                 IsSuspicious = Field.IsSuspicious;
                 IsValid = Field.IsValid;
-
+                IsExportable = Field.IsExportable;
+                IsVerified = Field.IsVerified;
                 if (IsMatched)
                     Regions=GetRegions(Field.Regions);
                 //SuspiciousSymbols = Field.SuspiciousSymbols;

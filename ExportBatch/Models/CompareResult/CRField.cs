@@ -39,48 +39,96 @@ namespace ExportBatch.Models.CompareResult
         //public string Type { get; set; }
 
         public CRField() { }
+
         public CRField(Field recognised, Field verified)
         {
-            if (!verified.Name.Equals(recognised.Name))
-            { return; }
-
             Name = verified.Name;
-            RecognisedValue = recognised.Value;
-            VerifiedValue = verified.Value;
-
-            if (!string.IsNullOrEmpty(recognised.Value) && !string.IsNullOrEmpty(verified.Value))
-            { Quality = 100 - (GetDistanceCore(recognised.Value, verified.Value) * 100); }
-            else
-            { Quality = 0; }
-
-            if (HasItems(verified))
+            if (verified.Items!=null)
             {
                 double rcqualyty = 0;
-
                 var crItems = new List<CRItem>();
-               // for (int rd = 0; rd < recognised.Items.Count; rd++)
+                int itemsCount = 0;
+
+
+                if (recognised.Items.Count.Equals(verified.Items.Count))
                 {
-                    for (int vd = 0; vd < verified.Items.Count; vd++)
+                    for (int i = 0; i < verified.Items.Count; i++)
                     {
-                        var critem = new CRItem(recognised.Items[vd], verified.Items[vd]);
+
+                        var critem = new CRItem(recognised.Items[i], verified.Items[i]);
                         rcqualyty += critem.Quality;
                         crItems.Add(critem);
+                        itemsCount++;
+                    }
+
+                }
+                else
+                {
+                    for (int i = 0; i < verified.Items.Count; i++)
+                    {
+                        if (recognised.Items.Count > i)
+                        {
+                            var critem = new CRItem(recognised.Items[i], verified.Items[i]);
+                            rcqualyty += critem.Quality;
+                            crItems.Add(critem);
+                            itemsCount++;
+                        }
+                     
                     }
                 }
+
                 Items = crItems;
-                Quality = rcqualyty / recognised.Items.Count;
+                Quality = rcqualyty / itemsCount;
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(recognised.Value) && !string.IsNullOrEmpty(verified.Value))
+                { Quality = 100 - (GetDistanceCore(recognised.Value, verified.Value) * 100); }
+                else
+                { Quality = 0; }
+                RecognisedValue = recognised.Value;
+                VerifiedValue = verified.Value;
+                Items = null;
             }
 
         }
 
-
-        public static bool HasItems(Field field)
+        private static List<CRItem> CompareItems(List<Item> RecognisedTable, List<Item> VerifiedTable)
         {
-            if(field.Items != null && field.Items.Count > 0)
-                return true;
-            return false;
+            var Result = new List<CRItem>();
+            foreach (var Row in VerifiedTable)
+            {
+                var rRow = FindRow(RecognisedTable, Row);
+                if(rRow != null)
+                    Result.Add(rRow);
+            }
+            return Result;
         }
 
+        private static CRItem FindRow(List<Item> RecognisedTable, Item Row)
+        {
+            int rowIndex = 0;
+            double distance = 0;
+            foreach (var rRow in RecognisedTable)
+            {
+                foreach (var f in Row.Fields)
+                {
+                   // distance += 100 - (GetDistanceCore(GetField(rRow, f.Name),  ;
+                }
+            }
+            return new CRItem();
+        }
+
+        private static Field GetField(Item Row, string field)
+        {
+            foreach(Field f in Row.Fields)
+                if(f.Name == field)
+                    return f;
+            return null;
+
+        }
+
+     
 
         /// <summary>
         /// 

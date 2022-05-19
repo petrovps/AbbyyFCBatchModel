@@ -23,7 +23,6 @@ namespace ExportBatch.Tools
                 }
             }
         }
-
         private static void CheckTable(IField field, IProcessingCallback processing)
         {
             if (field.Type == TExportFieldType.EFT_Table)
@@ -35,9 +34,7 @@ namespace ExportBatch.Tools
                     bool RemoveRow = true;
                     foreach (IField f in field.Rows[i].Children)
                     {
-                        processing.ReportMessage($"field.Name = {f.Name}, field.Type = {f.Type}");
-                        //if (f.Type == TExportFieldType.EFT_Table)
-                        //    CheckTable(f, processing);
+                       // processing.ReportMessage($"field.Name = {f.Name}, field.Type = {f.Type}");
                         if (!string.IsNullOrEmpty(f.Text))
                             RemoveRow = false;
                     }
@@ -47,10 +44,7 @@ namespace ExportBatch.Tools
 
                 foreach (int i in EmptyRows)
                     field.Rows.Delete(field.Rows[i]);
-
             }
         }
-
-
     }
 }

@@ -25,7 +25,11 @@ namespace ExportBatch.Models.Export
         public Document() { }
         public Document(IDocument document)
         {
-            Name = document.DocumentDefinition.Name;
+            if(document.DocumentDefinition.Name.Contains("Удаленное определение документа"))
+                Name = document.Sections[0].Name;
+            else
+                Name = document.DocumentDefinition.Name;
+
             Id = document.Id;
             Properties = GetProps(document.Properties).Where(item => item != null).ToList();
             Sections = GetSections(document.Sections).Where(item => item != null).ToList();

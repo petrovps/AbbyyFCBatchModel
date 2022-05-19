@@ -42,16 +42,56 @@ namespace ExportBatch.Models.CompareResult
             CreationDate = verified.CreationDate;
             double crBatchQuality = 0;
             var crDocuments = new List<CRDocument>();
-
+            int DocCount = 0;
             for (int vd = 0; vd < verified.Documents.Count; vd++)
             {
-                var crdoc = new CRDocument(recognised.Documents[vd], verified.Documents[vd]);
-                crBatchQuality += crdoc.Quality;
-                crDocuments.Add(crdoc);
-            }
+                if (string.IsNullOrEmpty(verified.Documents[vd].Name))
+                    continue;
 
-            Quality = crBatchQuality / verified.Documents.Count;
+                if (verified.Documents[vd].Name.Equals(recognised.Documents[vd]))
+                {
+                    var crdoc = new CRDocument(recognised.Documents[vd], verified.Documents[vd]);
+                    crBatchQuality += crdoc.Quality;
+                    crDocuments.Add(crdoc);
+                    DocCount++;
+                }
+                else
+                {
+                    var doc = FindDoc(recognised.Documents, verified.Documents[vd].Name);
+                    if(doc != null)
+                    {
+                        var crdoc = new CRDocument(doc, verified.Documents[vd]);
+                        crBatchQuality += crdoc.Quality;
+                        crDocuments.Add(crdoc);
+                        DocCount++;
+                    }
+                    else
+                    {
+                        var crdoc = new CRDocument();
+                        crdoc.Name=verified.Documents[vd].Name;
+                        crdoc.Quality = 0;
+                        crdoc.Sections = null;
+                        crDocuments.Add(crdoc);
+                        DocCount++;
+                    }
+
+                }
+              
+            }
+            Quality = crBatchQuality / DocCount;
             Documents = crDocuments;
         }
+
+
+        private static Document FindDoc(List<Document> WhereToSearch, string DocName)
+        {
+            foreach(Document doc in WhereToSearch)
+            {
+                if (doc.Name.Equals(DocName))
+                    return doc;
+            }
+            return null;
+        }
+
     }
 }
