@@ -43,12 +43,15 @@ namespace ExportBatch.Models.CompareResult
             double crBatchQuality = 0;
             var crDocuments = new List<CRDocument>();
             int DocCount = 0;
+            if (verified.Documents == null)
+                return;
+
             for (int vd = 0; vd < verified.Documents.Count; vd++)
             {
                 if (string.IsNullOrEmpty(verified.Documents[vd].Name))
                     continue;
 
-                if (verified.Documents[vd].Name.Equals(recognised.Documents[vd]))
+                if (recognised.Documents.Count>0 && verified.Documents[vd].Name.Equals(recognised.Documents[vd].Name))
                 {
                     var crdoc = new CRDocument(recognised.Documents[vd], verified.Documents[vd]);
                     crBatchQuality += crdoc.Quality;

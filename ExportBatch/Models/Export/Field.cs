@@ -40,14 +40,15 @@ namespace ExportBatch.Models.Export
             Name = Field.Name;
             //if (!IsLeaf(Field)) return;
             Type = Field.Type.ToString();
-            if(IsLeaf(Field))
+            IsExportable = Field.IsExportable;
+            if (IsLeaf(Field))
             {
                 Value = Field.Text;
                 IsMatched = Field.IsMatched;
                 HasRuleError = Field.HasRuleError;
                 IsSuspicious = Field.IsSuspicious;
                 IsValid = Field.IsValid;
-                IsExportable = Field.IsExportable;
+               
                 IsVerified = Field.IsVerified;
                 if (IsMatched)
                     Regions=GetRegions(Field.Regions);

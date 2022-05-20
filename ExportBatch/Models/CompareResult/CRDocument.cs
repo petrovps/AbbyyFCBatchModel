@@ -27,7 +27,7 @@ namespace ExportBatch.Models.CompareResult
 
             for (int vd = 0; vd < verified.Sections.Count; vd++)
             {
-                var crseq = new CRSection(recognised.Sections[vd], verified.Sections[vd]);
+                var crseq = new CRSection(verified.Sections[vd], recognised.Sections[vd]);
                 rcqualyty += crseq.Quality;
                 crSections.Add(crseq);
             }

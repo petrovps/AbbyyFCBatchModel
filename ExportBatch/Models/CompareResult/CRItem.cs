@@ -26,7 +26,7 @@ namespace ExportBatch.Models.CompareResult
             {
                 if (!verified.Fields[vd].Type.Equals("EFT_Table") && string.IsNullOrEmpty(recognised.Fields[vd].Value) && string.IsNullOrEmpty(verified.Fields[vd].Value))
                     continue;
-                if (!verified.Fields[vd].IsExportable)//|| !verified.Fields[vd].IsMatched)
+                if (!verified.Fields[vd].Type.Equals("EFT_Table") && !verified.Fields[vd].IsExportable)//|| !verified.Fields[vd].IsMatched)
                     continue;
 
                 if (verified.Fields[vd].Name.Equals(recognised.Fields[vd].Name))
@@ -58,8 +58,14 @@ namespace ExportBatch.Models.CompareResult
                 }
             }
 
-            Fields = crFields;
-            Quality = rcqualyty / count;
+            if (crFields != null)
+            {
+                Fields = crFields;
+                Quality = rcqualyty / count;
+            }
+            else
+                return;
+
         }
 
 

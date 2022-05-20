@@ -50,7 +50,7 @@ namespace ExportBatch.Models.CompareResult
                 int itemsCount = 0;
 
 
-                if (recognised.Items.Count.Equals(verified.Items.Count))
+                if (recognised.Items!=null && recognised.Items.Count.Equals(verified.Items.Count))
                 {
                     for (int i = 0; i < verified.Items.Count; i++)
                     {
@@ -66,7 +66,7 @@ namespace ExportBatch.Models.CompareResult
                 {
                     for (int i = 0; i < verified.Items.Count; i++)
                     {
-                        if (recognised.Items.Count > i)
+                        if (recognised.Items != null && recognised.Items.Count > i)
                         {
                             var critem = new CRItem(recognised.Items[i], verified.Items[i]);
                             rcqualyty += critem.Quality;
@@ -86,6 +86,7 @@ namespace ExportBatch.Models.CompareResult
                 { Quality = 100 - (GetDistanceCore(recognised.Value, verified.Value) * 100); }
                 else
                 { Quality = 0; }
+
                 RecognisedValue = recognised.Value;
                 VerifiedValue = verified.Value;
                 Items = null;
