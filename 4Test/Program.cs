@@ -24,5 +24,5 @@ var verified = JsonConvert.DeserializeObject<Batch>(File.ReadAllText(@"D:\GIT\Ab
 
 
 CRBatch p = new CRBatch(recognysed, verified);
-File.WriteAllText("compareresult.json",JsonConvert.SerializeObject(p));
+File.WriteAllText("compareresult.json", JsonConvert.SerializeObject(p));
 Console.ReadLine();

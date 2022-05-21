@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ExportBatch.Models.Export;
 namespace ExportBatch.Models.CompareResult
@@ -43,93 +40,110 @@ namespace ExportBatch.Models.CompareResult
         public CRField(Field recognised, Field verified)
         {
             Name = verified.Name;
-            if (verified.Items!=null)
-            {
-                double rcqualyty = 0;
-                var crItems = new List<CRItem>();
-                int itemsCount = 0;
-
-
-                if (recognised.Items!=null && recognised.Items.Count.Equals(verified.Items.Count))
-                {
-                    for (int i = 0; i < verified.Items.Count; i++)
-                    {
-
-                        var critem = new CRItem(recognised.Items[i], verified.Items[i]);
-                        rcqualyty += critem.Quality;
-                        crItems.Add(critem);
-                        itemsCount++;
-                    }
-
-                }
-                else
-                {
-                    for (int i = 0; i < verified.Items.Count; i++)
-                    {
-                        if (recognised.Items != null && recognised.Items.Count > i)
-                        {
-                            var critem = new CRItem(recognised.Items[i], verified.Items[i]);
-                            rcqualyty += critem.Quality;
-                            crItems.Add(critem);
-                            itemsCount++;
-                        }
-                     
-                    }
-                }
-
-                Items = crItems;
-                Quality = rcqualyty / itemsCount;
-            }
-            else
+            if (IsField(verified.Type) && verified.Items == null) //обрабатываем обычные поля
             {
                 if (!string.IsNullOrEmpty(recognised.Value) && !string.IsNullOrEmpty(verified.Value))
                 { Quality = 100 - (GetDistanceCore(recognised.Value, verified.Value) * 100); }
                 else
                 { Quality = 0; }
-
                 RecognisedValue = recognised.Value;
                 VerifiedValue = verified.Value;
                 Items = null;
             }
-
-        }
-
-        private static List<CRItem> CompareItems(List<Item> RecognisedTable, List<Item> VerifiedTable)
-        {
-            var Result = new List<CRItem>();
-            foreach (var Row in VerifiedTable)
+            else if (IsGrouporTable(verified.Type) && verified.Items != null) // обрабатываем группы и таблицы
             {
-                var rRow = FindRow(RecognisedTable, Row);
-                if(rRow != null)
-                    Result.Add(rRow);
-            }
-            return Result;
-        }
-
-        private static CRItem FindRow(List<Item> RecognisedTable, Item Row)
-        {
-            int rowIndex = 0;
-            double distance = 0;
-            foreach (var rRow in RecognisedTable)
-            {
-                foreach (var f in Row.Fields)
+              
+                if (recognised.Items != null && recognised.Items.Count.Equals(verified.Items.Count)) // Если кол-во строк таблиц совпадает
                 {
-                   // distance += 100 - (GetDistanceCore(GetField(rRow, f.Name),  ;
+                    var crItems = new List<CRItem>();
+                    double rcqualyty = 0;
+                    int itemsCount = 0;
+                    for (int i = 0; i < verified.Items.Count; i++)
+                    {
+                        var critem = new CRItem(verified.Items[i], recognised.Items[i]);
+                        rcqualyty += critem.Quality;
+                        crItems.Add(critem);
+                        itemsCount++;
+                    }
+                    Items=crItems;
                 }
-            }
-            return new CRItem();
+                else if(recognised.Items == null) // Если распознанная таблица пуста
+                {
+                    var crItems = new List<CRItem>();
+                    for (int i = 0; i < verified.Items.Count; i++)
+                    {
+                        var critem = new CRItem(verified.Items[i]);
+                        crItems.Add(critem);
+                    }
+                    Items = crItems;
+                }
+                else // Количество строк отличается
+                {
+                    var crItems = new List<CRItem>();
+                    foreach(Item item in verified.Items)
+                    {
+                        crItems.Add(GetComparedRow(item, recognised.Items));
+                    }
+                    Quality = AverageQuality(crItems);
+                    Items =crItems;
+                }
+            }    
         }
 
-        private static Field GetField(Item Row, string field)
+        private static double AverageQuality(List<CRItem> List)
         {
-            foreach(Field f in Row.Fields)
-                if(f.Name == field)
-                    return f;
-            return null;
-
+            double rcqualyty = 0;
+            int i = 0;
+            foreach(CRItem item in List)
+            {
+                if (double.IsNaN(item.Quality))
+                    continue;
+                rcqualyty += item.Quality;
+                i++;
+            }
+            return rcqualyty / i;
         }
 
-     
+        /// <summary>
+        ///  Ищем верифицированную строку в распознанной таблице
+        /// </summary>
+        /// <param name="RecognisedTable"></param>
+        /// <param name="VerifiedRow"></param>
+        /// <returns></returns>
+        private static CRItem GetComparedRow(Item VerifiedRow, List<Item> RecognisedTable)
+        {
+            CRItem result = null;
+           foreach(Item RRow in RecognisedTable)
+            {
+                if (result == null)
+                {
+                    result = new CRItem(RRow, VerifiedRow);
+                    continue;
+                }
+                   
+                var temp = new CRItem(RRow, VerifiedRow);
+                if (result.Quality < temp.Quality)
+                    result = temp;
+            }
+            return result;
+        }
+
+
+
+        private static bool IsGrouporTable(string typename)
+        {
+            List<string> Types = new List<string>(){"EFT_Group","EFT_Table"};
+            if(Types.Contains(typename))
+                return true;
+            return false;
+        }
+        private static bool IsField(string typename)
+        {
+            List<string> Types = new List<string>() { "EFT_TextField","EFT_DateTimeField","EFT_NumberField","EFT_PictureField","EFT_CurrencyField","EFT_Checkmark"};
+            if (Types.Contains(typename))
+                return true;
+            return false;
+        }
 
         /// <summary>
         /// 

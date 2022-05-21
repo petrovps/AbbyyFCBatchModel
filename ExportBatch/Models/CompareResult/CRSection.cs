@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using ExportBatch.Models.Export;
 
@@ -23,9 +19,7 @@ namespace ExportBatch.Models.CompareResult
         public CRSection(Section verified, Section recognised) 
         {
             Name = verified.Name;
-            double rcqualyty = 0;
             var crFields = new List<CRField>();
-            int count = 0;
 
             for (int vd = 0; vd < verified.Fields.Count; vd++)
             {
@@ -37,9 +31,7 @@ namespace ExportBatch.Models.CompareResult
                 if (verified.Fields[vd].Name.Equals(recognised.Fields[vd].Name))
                 {
                     var crfield = new CRField(recognised.Fields[vd], verified.Fields[vd]); 
-                    rcqualyty += crfield.Quality;
                     crFields.Add(crfield);
-                    count++;
                 }
                 else
                 {
@@ -47,9 +39,7 @@ namespace ExportBatch.Models.CompareResult
                     if(field != null)
                     {
                         var crfield = new CRField(field, verified.Fields[vd]);
-                        rcqualyty += crfield.Quality;
                         crFields.Add(crfield);
-                        count++;
                     }
                     else
                     {
@@ -58,16 +48,27 @@ namespace ExportBatch.Models.CompareResult
                         crfield.Quality = 0;
                         crfield.Name = verified.Fields[vd].Name;
                         crFields.Add(crfield);
-                        count++;
                     }
                 }
             }
 
             Fields = crFields;
-            Quality = rcqualyty / count;
+            Quality = AverageQuality(crFields);
 
         }
-
+        private static double AverageQuality(List<CRField> List)
+        {
+            double rcqualyty = 0;
+            int i = 0;
+            foreach (CRField item in List)
+            {
+                if (double.IsNaN(item.Quality))
+                    continue;
+                rcqualyty += item.Quality;
+                i++;
+            }
+            return rcqualyty / i;
+        }
         private static Field FindField(List<Field> WhereToFind, string FieldName)
         {
             foreach (Field f in WhereToFind)

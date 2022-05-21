@@ -17,10 +17,10 @@ namespace ExportBatch.Models.RCSRequest
         public string ProcessName { get; set; }
         [JsonProperty(PropertyName = "processParams")]
         public List<Param> ProcessParams { get; set; }
-        [JsonProperty(PropertyName = "items")]
+        [JsonProperty(PropertyName = "processItems")]
         public List<Item> Items { get; set; }
-        [JsonProperty(PropertyName = "serviceParams")]
-        public List<Param> ServiceParams { get; set; }
+        [JsonProperty(PropertyName = "requestParams")]
+        public List<Param> RequestParams { get; set; }
         [JsonProperty(PropertyName = "processVersion")]
         public string ProcessVersion { get; set; } = "2.0";
 
@@ -30,7 +30,7 @@ namespace ExportBatch.Models.RCSRequest
             ProcessName = "Process1";
             var Param = new Param() { Name = "ParamName", Value = "ParamValue"};
             ProcessParams = new List<Param>() { Param };
-            ServiceParams = new List<Param>() { Param };
+            RequestParams = new List<Param>() { Param };
             ProcessVersion = "2.0";
             var file = new Item();
             Items = new List<Item>() { file };

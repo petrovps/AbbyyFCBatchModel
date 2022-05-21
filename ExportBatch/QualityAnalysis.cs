@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using System.IO;
 using ExportBatch.Models.Export;
 using ExportBatch.Models.CompareResult;
 using ABBYY.FlexiCapture;
@@ -35,38 +31,20 @@ namespace ExportBatch
 
                     batch.Properties.Set("BatchQuality", cRBatch.Quality.ToString());
 
-                   
 
-                    foreach(var cDoc in cRBatch.Documents)
+
+
+                    for(int i = 0; i< cRBatch.Documents.Count; i++)
                     {
-                        batch.Properties.Set($"Quality_{cDoc.Name}", cDoc.Quality.ToString());
-
-                        //foreach(IDocument doc in batch.Documents)
-                        //{
-                        //    //if (cDoc.Id != null)
-                        //    //{
-                        //    //    if (cDoc.Id.Equals(doc.Id))
-                        //    //    {
-                        //    //        doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
-                        //    //        break;
-                        //    //    }
-                        //    //}
-                        //    if (cDoc.Name.Equals(doc.DefinitionName))
-                        //    {
-                        //        doc.Properties.Set("DocumentQuality", cDoc.Quality.ToString());
-                        //        break;
-                        //    }
-                        //}
+                        if (!batch.Properties.Has(cRBatch.Documents[i].Name))
+                            batch.Properties.Set($"Quality_{cRBatch.Documents[i].Name}", cRBatch.Documents[i].Quality.ToString());
+                        else
+                            batch.Properties.Set($"Quality_{cRBatch.Documents[i].Name}_[{i}]", cRBatch.Documents[i].Quality.ToString());
                     }
-
-
                     string cRBatchJson = JsonConvert.SerializeObject(cRBatch);
-                    // File.WriteAllText("CompareResult.json", JsonConvert.SerializeObject(cRBatch));
-
 
                     if (batch.Attachments.Has("CompareResult.json"))
                         batch.Attachments.Delete("CompareResult.json");
-
 
                     IUserAttachment attachment = batch.Attachments.AddNew("CompareResult.json");
                     attachment.AsString = cRBatchJson;
@@ -82,5 +60,49 @@ namespace ExportBatch
         }
 
 
+        /// <summary>
+        /// на случай, если нужно поменять имя поля
+        /// </summary>
+        /// <param name="batch"></param>
+        /// <param name="processing"></param>
+        /// <param name="attachmentname"></param>
+        /// <param name=""></param>
+        public void ChangeFieldName(IBatch batch, IProcessingCallback processing, string attachmentname, string DocName, string OldFieldName, string NewFieldName)
+        {
+            if (!attachmentname.EndsWith(".json"))
+                attachmentname += ".json";
+
+            if (!batch.Attachments.Has(attachmentname))
+            {
+                processing.ReportWarning($"Нет файла вложения {attachmentname}.");
+                return;
+            }
+
+            var RecognisedData = JsonConvert.DeserializeObject<Batch>(batch.Attachments.Get(attachmentname).AsString);
+            foreach (Document document in RecognisedData.Documents)
+            {
+                if(document.Name == DocName)
+                {
+                    foreach(Section Section in document.Sections)
+                    {
+                        foreach(Field field in Section.Fields)
+                        {
+                            if(field.Name == OldFieldName)
+                                field.Name = NewFieldName;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (batch.Attachments.Has(attachmentname))
+                batch.Attachments.Delete(attachmentname);
+
+            string RecognisedDataJson = JsonConvert.SerializeObject(RecognisedData);
+            IUserAttachment attachment = batch.Attachments.AddNew(attachmentname);
+            attachment.AsString = RecognisedDataJson;
+            attachment.UploadAttachment();
+
+        }
     }
 }

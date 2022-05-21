@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using ExportBatch.Models.Export;
 
@@ -36,13 +32,8 @@ namespace ExportBatch.Models.CompareResult
             Name = verified.Name;
             BatchTypeName = verified.BatchTypeName;
 
-            //if(verified.Id!= null)
-            //    Id = verified.Id;
-
             CreationDate = verified.CreationDate;
-            double crBatchQuality = 0;
             var crDocuments = new List<CRDocument>();
-            int DocCount = 0;
             if (verified.Documents == null)
                 return;
 
@@ -51,12 +42,10 @@ namespace ExportBatch.Models.CompareResult
                 if (string.IsNullOrEmpty(verified.Documents[vd].Name))
                     continue;
 
-                if (recognised.Documents.Count>0 && verified.Documents[vd].Name.Equals(recognised.Documents[vd].Name))
+                if (recognised.Documents!=null && verified.Documents[vd].Name.Equals(recognised.Documents[vd].Name))
                 {
                     var crdoc = new CRDocument(recognised.Documents[vd], verified.Documents[vd]);
-                    crBatchQuality += crdoc.Quality;
                     crDocuments.Add(crdoc);
-                    DocCount++;
                 }
                 else
                 {
@@ -64,9 +53,7 @@ namespace ExportBatch.Models.CompareResult
                     if(doc != null)
                     {
                         var crdoc = new CRDocument(doc, verified.Documents[vd]);
-                        crBatchQuality += crdoc.Quality;
                         crDocuments.Add(crdoc);
-                        DocCount++;
                     }
                     else
                     {
@@ -75,16 +62,31 @@ namespace ExportBatch.Models.CompareResult
                         crdoc.Quality = 0;
                         crdoc.Sections = null;
                         crDocuments.Add(crdoc);
-                        DocCount++;
                     }
-
                 }
-              
             }
-            Quality = crBatchQuality / DocCount;
-            Documents = crDocuments;
+
+            if (crDocuments.Count > 0)
+            {
+                Quality = AverageQuality(crDocuments);
+                Documents = crDocuments;
+            }
+           
         }
 
+        private static double AverageQuality(List<CRDocument> List)
+        {
+            double rcqualyty = 0;
+            int i = 0;
+            foreach (CRDocument item in List)
+            {
+                if (double.IsNaN(item.Quality))
+                    continue;
+                rcqualyty += item.Quality;
+                i++;
+            }
+            return rcqualyty / i;
+        }
 
         private static Document FindDoc(List<Document> WhereToSearch, string DocName)
         {
