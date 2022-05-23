@@ -66,6 +66,7 @@ namespace ExportBatch.Models.CompareResult
                         itemsCount++;
                     }
                     Items=crItems;
+                    Quality = AverageQuality(crItems);
                 }
                 else if(recognised.Items == null) // Если распознанная таблица пуста
                 {
@@ -76,6 +77,8 @@ namespace ExportBatch.Models.CompareResult
                         crItems.Add(critem);
                     }
                     Items = crItems;
+                    if(crItems!=null)
+                        Quality = AverageQuality(crItems);
                 }
                 else // Количество строк отличается
                 {
@@ -84,10 +87,12 @@ namespace ExportBatch.Models.CompareResult
                     {
                         crItems.Add(GetComparedRow(item, recognised.Items));
                     }
-                    Quality = AverageQuality(crItems);
                     Items =crItems;
+                    if (crItems != null)
+                        Quality = AverageQuality(crItems);
                 }
-            }    
+                return;
+            }
         }
 
         private static double AverageQuality(List<CRItem> List)
