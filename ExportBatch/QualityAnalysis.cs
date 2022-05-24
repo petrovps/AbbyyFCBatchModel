@@ -88,8 +88,11 @@ namespace ExportBatch
                         foreach(Field field in Section.Fields)
                         {
                             if(field.Name == OldFieldName)
+                            {
                                 field.Name = NewFieldName;
-                            break;
+                                processing.ReportMessage($"Поле {OldFieldName} переименовано в {NewFieldName}");
+                                break;
+                            }
                         }
                     }
                 }
@@ -97,6 +100,7 @@ namespace ExportBatch
 
             if (batch.Attachments.Has(attachmentname))
                 batch.Attachments.Delete(attachmentname);
+           
 
             string RecognisedDataJson = JsonConvert.SerializeObject(RecognisedData);
             IUserAttachment attachment = batch.Attachments.AddNew(attachmentname);
