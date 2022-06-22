@@ -35,15 +35,22 @@ namespace ExportBatch.Tools
                     foreach (IField f in field.Rows[i].Children)
                     {
                        // processing.ReportMessage($"field.Name = {f.Name}, field.Type = {f.Type}");
-                        if (!string.IsNullOrEmpty(f.Text))
+                        if (!string.IsNullOrWhiteSpace(f.Text))
                             RemoveRow = false;
                     }
                     if(RemoveRow)
                         EmptyRows.Add(i);
                 }
 
+                processing.ReportMessage($"Путсых строк: {EmptyRows.Count};");
+                processing.ReportMessage($"Путсыt строки: {string.Join(",", EmptyRows)};");
+
                 foreach (int i in EmptyRows)
+                {
                     field.Rows.Delete(field.Rows[i]);
+                    processing.ReportMessage($"Строка {i} Удалена;");
+                }
+                   
             }
         }
     }

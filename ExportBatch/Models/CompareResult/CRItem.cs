@@ -25,6 +25,8 @@ namespace ExportBatch.Models.CompareResult
                     continue;
                 if (!verified.Fields[vd].Type.Equals("EFT_Table") && !verified.Fields[vd].IsExportable)//|| !verified.Fields[vd].IsMatched)
                     continue;
+                if (verified.Fields[vd].Type.Equals("EFT_Table") && verified.Fields[vd].Items == null) // пропустим пустые таблицы, т.к. иначе качетсво = 0
+                    continue;
 
                 if (verified.Fields[vd].Name.Equals(recognised.Fields[vd].Name))
                 {
@@ -50,7 +52,7 @@ namespace ExportBatch.Models.CompareResult
                 }
             }
 
-            if (crFields != null)
+            if (crFields != null && crFields.Count!=0)
             {
                 Fields = crFields;
                 Quality = AverageQuality(crFields);

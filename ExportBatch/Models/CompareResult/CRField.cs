@@ -42,6 +42,7 @@ namespace ExportBatch.Models.CompareResult
             Name = verified.Name;
             if (IsField(verified.Type) && verified.Items == null) //обрабатываем обычные поля
             {
+                Console.WriteLine($"{verified.Name} - Обычяное поле");
                 if (!string.IsNullOrEmpty(recognised.Value) && !string.IsNullOrEmpty(verified.Value))
                 { Quality = 100 - (GetDistanceCore(recognised.Value, verified.Value) * 100); }
                 else
@@ -52,15 +53,20 @@ namespace ExportBatch.Models.CompareResult
             }
             else if (IsGrouporTable(verified.Type) && verified.Items != null) // обрабатываем группы и таблицы
             {
-              
+                Console.WriteLine($"{verified.Name} - Таблица или группа");
                 if (recognised.Items != null && recognised.Items.Count.Equals(verified.Items.Count)) // Если кол-во строк таблиц совпадает
                 {
+                    Console.WriteLine($"количество строк  таблиц совпадает");
+                   
                     var crItems = new List<CRItem>();
                     double rcqualyty = 0;
                     int itemsCount = 0;
                     for (int i = 0; i < verified.Items.Count; i++)
                     {
                         var critem = new CRItem(verified.Items[i], recognised.Items[i]);
+
+                        if (critem.Fields == null || critem.Fields.Count == 0)
+                            continue;
                         rcqualyty += critem.Quality;
                         crItems.Add(critem);
                         itemsCount++;
@@ -82,6 +88,7 @@ namespace ExportBatch.Models.CompareResult
                 }
                 else // Количество строк отличается
                 {
+                    Console.WriteLine("Количество строк отличается");
                     var crItems = new List<CRItem>();
                     foreach(Item item in verified.Items)
                     {

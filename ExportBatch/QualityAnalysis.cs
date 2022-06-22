@@ -108,5 +108,70 @@ namespace ExportBatch
             attachment.UploadAttachment();
 
         }
+
+
+
+
+
+
+
+
+        public void ChangeAllToExportable(IBatch batch, IProcessingCallback processing, string attachmentname)
+        {
+            if (!attachmentname.EndsWith(".json"))
+                attachmentname += ".json";
+
+            if (!batch.Attachments.Has(attachmentname))
+            {
+                processing.ReportWarning($"Нет файла вложения {attachmentname}.");
+                return;
+            }
+
+            var RecognisedData = JsonConvert.DeserializeObject<Batch>(batch.Attachments.Get(attachmentname).AsString);
+            foreach (Document document in RecognisedData.Documents)
+            {
+
+                foreach (Section Section in document.Sections)
+                {
+                    foreach (Field field in Section.Fields)
+                    {
+                        if (field.IsExportable == false)
+                        {
+                            field.IsExportable = true;
+                            processing.ReportMessage($"Полю {field.Name} установлен IsExportable = true");
+                        }
+
+                        if(field.Items!=null && field.Items.Count > 0)
+                        {
+                            foreach(var item in field.Items)
+                            {
+                                foreach(Field field2 in item.Fields)
+                                {
+                                    if (field2.IsExportable == false)
+                                    {
+                                        field2.IsExportable = true;
+                                        processing.ReportMessage($"Полю {field2.Name} установлен IsExportable = true");
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+            if (batch.Attachments.Has(attachmentname))
+                batch.Attachments.Delete(attachmentname);
+
+
+            string RecognisedDataJson = JsonConvert.SerializeObject(RecognisedData);
+            IUserAttachment attachment = batch.Attachments.AddNew(attachmentname);
+            attachment.AsString = RecognisedDataJson;
+            attachment.UploadAttachment();
+
+        }
+
+
     }
 }

@@ -17,12 +17,22 @@ using ExportBatch.Models.Export;
 //var recognitionresult = new RCSRequest();
 //var recognitionResultJson = JsonConvert.SerializeObject(recognitionresult);
 //System.IO.File.WriteAllText("RequestModel.json", recognitionResultJson);
+var RecognisedData = File.ReadAllText(@"D:\GIT\AbbyyFCBatchModel\4Test\bin\Debug\net6.0\VerifiedData.json");
+
+RecognisedData = RecognisedData.Replace("\"isExportable\": false", "\"isExportable\": true");
+
+File.WriteAllText(@"D:\GIT\AbbyyFCBatchModel\4Test\bin\Debug\net6.0\VerifiedData.json", RecognisedData);
+
 
 //var batch = new QualityAnalysis() { };
 var recognysed = JsonConvert.DeserializeObject<Batch>(File.ReadAllText(@"D:\GIT\AbbyyFCBatchModel\4Test\bin\Debug\net6.0\RecognisedData.json"));
 var verified = JsonConvert.DeserializeObject<Batch>(File.ReadAllText(@"D:\GIT\AbbyyFCBatchModel\4Test\bin\Debug\net6.0\VerifiedData.json"));
 
 
+
+
 CRBatch p = new CRBatch(recognysed, verified);
 File.WriteAllText("compareresult.json", JsonConvert.SerializeObject(p));
 Console.ReadLine();
+
+
